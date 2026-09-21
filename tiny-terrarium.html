@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny Terrarium 🌿</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&display=swap');
+
+  :root{
+    --cream: #FBF6EC;
+    --cream-deep: #F1E8D6;
+    --moss-deep: #33502F;
+    --moss: #5C8A4E;
+    --leaf: #8FB56B;
+    --terracotta: #C9714A;
+    --terracotta-deep: #A85A38;
+    --glass: #DCEAE4;
+    --soil-dark: #5A3E2C;
+    --soil-light: #7C5A3D;
+    --ink: #3A3229;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background: radial-gradient(ellipse at top, var(--cream-deep), var(--cream) 60%);
+    font-family: 'Baloo 2', 'Segoe UI Rounded', 'Trebuchet MS', system-ui, sans-serif;
+    color: var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-x:hidden;
+  }
+
+  header{
+    text-align:center;
+    padding: 28px 20px 6px;
+  }
+
+  h1{
+    margin:0;
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight:700;
+    color: var(--moss-deep);
+    letter-spacing: 0.5px;
+  }
+
+  header p{
+    margin: 6px 0 0;
+    font-size: 15px;
+    color: #7A6E5D;
+    font-weight: 500;
+  }
+
+  .scene{
+    position: relative;
+    width: min(92vw, 420px);
+    margin: 18px auto 6px;
+  }
+
+  .jar-wrap{
+    position: relative;
+    filter: drop-shadow(0 18px 22px rgba(90, 62, 44, 0.18));
+  }
+
+  svg#jarSvg{
+    width: 100%;
+    height: auto;
+    display:block;
+  }
+
+  .item{
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+
+  .sway{
+    animation: sway 4.5s ease-in-out infinite;
+  }
+
+  @keyframes sway{
+    0%, 100% { transform: rotate(var(--rot, 0deg)); }
+    50% { transform: rotate(calc(var(--rot, 0deg) + 3deg)); }
+  }
+
+  .pop-in{
+    animation: popIn 0.45s cubic-bezier(.26,1.6,.5,1) both;
+  }
+  @keyframes popIn{
+    0%{ transform: scale(0) rotate(var(--rot,0deg)); opacity:0; }
+    100%{ transform: scale(1) rotate(var(--rot,0deg)); opacity:1; }
+  }
+
+  .sparkle{
+    pointer-events:none;
+    position:absolute;
+    font-size: 20px;
+    animation: sparkleFloat 0.9s ease-out forwards;
+  }
+  @keyframes sparkleFloat{
+    0%{ transform: translateY(0) scale(0.6); opacity: 1; }
+    100%{ transform: translateY(-38px) scale(1.15); opacity: 0; }
+  }
+
+  .butterfly{
+    position:absolute;
+    width: 26px;
+    height: 26px;
+    pointer-events:none;
+    will-change: transform;
+  }
+
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap: 10px;
+    padding: 18px 16px 8px;
+    max-width: 480px;
+  }
+
+  button{
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 18px;
+    cursor:pointer;
+    background: var(--moss);
+    color: white;
+    box-shadow: 0 3px 0 var(--moss-deep);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  button:active{
+    transform: translateY(3px);
+    box-shadow: 0 0 0 var(--moss-deep);
+  }
+  button.alt{
+    background: var(--terracotta);
+    box-shadow: 0 3px 0 var(--terracotta-deep);
+  }
+  button.ghost{
+    background: transparent;
+    color: #8a7a63;
+    box-shadow: none;
+    border: 2px solid #E3D6BC;
+    padding: 8px 16px;
+  }
+  button.ghost:active{
+    transform: translateY(2px);
+  }
+
+  footer{
+    margin: 6px 0 30px;
+    font-size: 12.5px;
+    color: #a89a82;
+    text-align:center;
+    padding: 0 20px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .sway, .butterfly, .pop-in, .sparkle{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tiny Terrarium</h1>
+  <p>Tap below to grow your own little jar of green.</p>
+</header>
+
+<div class="scene" id="scene">
+  <div class="jar-wrap">
+    <svg id="jarSvg" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="jarClip">
+          <path d="M110,58
+                   C110,44 210,44 210,58
+                   L214,92
+                   C258,108 268,150 268,190
+                   L268,330
+                   C268,378 232,398 160,398
+                   C88,398 52,378 52,330
+                   L52,190
+                   C52,150 62,108 106,92 Z"/>
+        </clipPath>
+        <linearGradient id="soilGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7C5A3D"/>
+          <stop offset="100%" stop-color="#4A311F"/>
+        </linearGradient>
+        <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#EAF3EE" stop-opacity="0.55"/>
+          <stop offset="55%" stop-color="#D7E7DF" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#C7DED4" stop-opacity="0.35"/>
+        </linearGradient>
+        <linearGradient id="lidGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#B4714A"/>
+          <stop offset="100%" stop-color="#8F5837"/>
+        </linearGradient>
+      </defs>
+
+      <!-- soil + growing items, clipped to jar interior -->
+      <g clip-path="url(#jarClip)">
+        <rect x="40" y="300" width="240" height="110" fill="url(#soilGrad)"/>
+        <path d="M52,300 C110,288 210,288 268,300 L268,312 C210,300 110,300 52,312 Z" fill="#6B4A32"/>
+        <g id="itemsLayer"></g>
+      </g>
+
+      <!-- jar glass, drawn above items for a glassy sheen -->
+      <path d="M110,58
+               C110,44 210,44 210,58
+               L214,92
+               C258,108 268,150 268,190
+               L268,330
+               C268,378 232,398 160,398
+               C88,398 52,378 52,330
+               L52,190
+               C52,150 62,108 106,92 Z"
+            fill="url(#glassGrad)" stroke="#C9DED2" stroke-width="3"/>
+
+      <!-- glass highlight streak -->
+      <path d="M84,110 C74,170 74,260 88,340" stroke="white" stroke-opacity="0.45" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+      <!-- jar lid -->
+      <rect x="98" y="30" width="124" height="20" rx="9" fill="url(#lidGrad)" stroke="#7A4B2E" stroke-width="2"/>
+      <rect x="104" y="22" width="112" height="14" rx="7" fill="#C9825A" stroke="#7A4B2E" stroke-width="2"/>
+    </svg>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button onclick="addItem('plant')">🌿 Plant</button>
+  <button onclick="addItem('flower')">🌸 Flower</button>
+  <button onclick="addItem('mushroom')">🍄 Mushroom</button>
+  <button onclick="addItem('rock')">🪨 Rock</button>
+  <button class="alt" onclick="spawnButterfly()">🦋 Butterfly</button>
+  <button class="ghost" onclick="emptyJar()">✨ Empty jar</button>
+</div>
+
+<footer>Your terrarium is saved automatically in this browser — close the tab and it'll be here when you come back.</footer>
+
+<script>
+(function(){
+  const itemsLayer = document.getElementById('itemsLayer');
+  const scene = document.getElementById('scene');
+  const STORAGE_KEY = 'tiny-terrarium-state-v1';
+  const MAX_ITEMS = 22;
+  const MAX_BUTTERFLIES = 5;
+
+  let state = { items: [], butterflies: 0 };
+
+  function svgEl(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  // ---- Plant art builders (local coordinates, base at 0,0, growing upward) ----
+  function buildPlant(scale){
+    const g = svgEl('g', {});
+    const h = 46 + Math.random()*30;
+    const leafColor = Math.random() > 0.5 ? '#5C8A4E' : '#7BA05B';
+    const stem = svgEl('path', {
+      d: `M0,0 C-2,${-h*0.4} 3,${-h*0.7} 0,${-h}`,
+      stroke: '#3D5A3D', 'stroke-width': 3.4, fill: 'none', 'stroke-linecap':'round'
+    });
+    g.appendChild(stem);
+    const leafPairs = 2 + Math.floor(Math.random()*2);
+    for(let i=1; i<=leafPairs; i++){
+      const t = i/(leafPairs+1);
+      const y = -h*t;
+      const size = 12 + Math.random()*8;
+      [-1,1].forEach(side=>{
+        const leaf = svgEl('path', {
+          d: `M0,${y} C${side*size},${y-size*0.6} ${side*size*1.3},${y+size*0.3} 0,${y+3}`,
+          fill: leafColor
+        });
+        g.appendChild(leaf);
+      });
+    }
+    const tip = svgEl('ellipse', { cx:0, cy:-h, rx:7, ry:10, fill: leafColor });
+    g.appendChild(tip);
+    return g;
+  }
+
+  function buildFlower(){
+    const g = svgEl('g', {});
+    const h = 40 + Math.random()*24;
+    const stem = svgEl('path', {
+      d: `M0,0 C2,${-h*0.5} -2,${-h*0.8} 0,${-h}`,
+      stroke:'#4C7A4C','stroke-width':3, fill:'none','stroke-linecap':'round'
+    });
+    g.appendChild(stem);
+    const leaf = svgEl('path', { d:`M0,${-h*0.4} C10,${-h*0.4-8} 14,${-h*0.4+4} 0,${-h*0.4+3}`, fill:'#5C8A4E'});
+    g.appendChild(leaf);
+    const petalColors = ['#E9879A','#F2B5C4','#F6D75B','#E8A54B','#D98BC9'];
+    const color = petalColors[Math.floor(Math.random()*petalColors.length)];
+    for(let i=0;i<6;i++){
+      const ang = (i/6)*Math.PI*2;
+      const px = Math.cos(ang)*8;
+      const py = -h + Math.sin(ang)*8;
+      g.appendChild(svgEl('ellipse', {cx:px, cy:py, rx:5.5, ry:8, fill:color, transform:`rotate(${ang*180/Math.PI} ${px} ${py})`}));
+    }
+    g.appendChild(svgEl('circle', {cx:0, cy:-h, r:5.5, fill:'#F6D75B'}));
+    return g;
+  }
+
+  function buildMushroom(){
+    const g = svgEl('g', {});
+    const h = 14 + Math.random()*8;
+    const capColors = ['#D2555A','#C9714A','#B85C7A'];
+    const color = capColors[Math.floor(Math.random()*capColors.length)];
+    g.appendChild(svgEl('rect', {x:-3, y:-h, width:6, height:h, rx:3, fill:'#F1E6D3'}));
+    g.appendChild(svgEl('path', {d:`M-13,${-h} C-13,${-h-14} 13,${-h-14} 13,${-h} Z`, fill:color}));
+    for(let i=0;i<3;i++){
+      const sx = (Math.random()-0.5)*16;
+      g.appendChild(svgEl('circle', {cx:sx, cy:-h-4-Math.random()*4, r:1.6, fill:'#FBF6EC'}));
+    }
+    return g;
+  }
+
+  function buildRock(){
+    const g = svgEl('g', {});
+    const w = 16 + Math.random()*14;
+    const colors = ['#9C9488','#B0A796','#8C8A82'];
+    g.appendChild(svgEl('ellipse', {cx:0, cy:-w*0.28, rx:w, ry:w*0.55, fill: colors[Math.floor(Math.random()*colors.length)]}));
+    g.appendChild(svgEl('ellipse', {cx:-w*0.25, cy:-w*0.4, rx:w*0.3, ry:w*0.16, fill:'#00000015'}));
+    return g;
+  }
+
+  const builders = { plant: buildPlant, flower: buildFlower, mushroom: buildMushroom, rock: buildRock };
+
+  function renderItem(data, animate){
+    const builder = builders[data.type];
+    if(!builder) return;
+    const inner = builder();
+    const wrap = svgEl('g', {
+      class: 'item' + (data.type !== 'rock' ? ' sway' : '') + (animate ? ' pop-in' : ''),
+      transform: `translate(${data.x},${data.y}) rotate(${data.rot})`,
+      style: `--rot:${data.rot}deg`
+    });
+    wrap.appendChild(inner);
+    itemsLayer.appendChild(wrap);
+  }
+
+  function addItem(type){
+    if(state.items.length >= MAX_ITEMS){
+      shake();
+      return;
+    }
+    const data = {
+      type,
+      x: 90 + Math.random()*140,
+      y: 300 - Math.random()*8,
+      rot: (Math.random()-0.5)*10
+    };
+    state.items.push(data);
+    renderItem(data, true);
+    burstSparkle();
+    save();
+  }
+
+  function shake(){
+    const wrap = document.querySelector('.jar-wrap');
+    wrap.style.transition = 'transform 0.08s';
+    wrap.style.transform = 'rotate(-2deg)';
+    setTimeout(()=>{ wrap.style.transform='rotate(2deg)'; }, 90);
+    setTimeout(()=>{ wrap.style.transform='rotate(0deg)'; }, 180);
+  }
+
+  function burstSparkle(){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = '✨';
+    const rect = scene.getBoundingClientRect();
+    s.style.left = (rect.width/2 + (Math.random()-0.5)*100) + 'px';
+    s.style.top = (rect.height*0.65) + 'px';
+    scene.style.position = 'relative';
+    scene.appendChild(s);
+    setTimeout(()=> s.remove(), 950);
+  }
+
+  // ---- Butterflies ----
+  const flightPaths = [
+    [[0,0],[40,-30],[10,10],[-30,-20],[0,0]],
+    [[0,0],[-50,10],[-20,-35],[30,5],[0,0]],
+    [[0,0],[25,-45],[-25,-10],[15,20],[0,0]]
+  ];
+
+  function spawnButterfly(){
+    if(state.butterflies >= MAX_BUTTERFLIES) return;
+    state.butterflies++;
+    save();
+    createButterflyEl();
+  }
+
+  function createButterflyEl(){
+    const b = document.createElement('div');
+    b.className = 'butterfly';
+    b.innerHTML = `<svg viewBox="0 0 40 40" width="100%" height="100%">
+      <g>
+        <ellipse cx="12" cy="16" rx="10" ry="7" fill="#F2B5C4" opacity="0.92"/>
+        <ellipse cx="28" cy="16" rx="10" ry="7" fill="#5B8C8C" opacity="0.92"/>
+        <ellipse cx="12" cy="27" rx="6" ry="4.5" fill="#E8A54B" opacity="0.9"/>
+        <ellipse cx="28" cy="27" rx="6" ry="4.5" fill="#F6D75B" opacity="0.9"/>
+        <rect x="19" y="12" width="2" height="18" rx="1" fill="#4A3B2B"/>
+      </g>
+    </svg>`;
+    const startX = 10 + Math.random()*80;
+    const startY = 10 + Math.random()*70;
+    b.style.left = startX + '%';
+    b.style.top = startY + '%';
+    scene.appendChild(b);
+    animateButterfly(b);
+  }
+
+  function animateButterfly(el){
+    const path = flightPaths[Math.floor(Math.random()*flightPaths.length)];
+    let i = 0;
+    const baseLeft = parseFloat(el.style.left);
+    const baseTop = parseFloat(el.style.top);
+
+    function step(){
+      const [dx, dy] = path[i % path.length];
+      const flutter = Math.sin(Date.now()/120) * 4;
+      el.style.transition = 'transform 2.2s ease-in-out';
+      el.style.transform = `translate(${dx}px, ${dy + flutter}px) rotate(${dx>0?8:-8}deg)`;
+      i++;
+    }
+    step();
+    setInterval(step, 2200);
+  }
+
+  function emptyJar(){
+    itemsLayer.innerHTML = '';
+    document.querySelectorAll('.butterfly').forEach(b => b.remove());
+    state = { items: [], butterflies: 0 };
+    save();
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){ /* storage unavailable, silently skip */ }
+  }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.items)){
+          state = parsed;
+        }
+      }
+    }catch(e){ /* corrupt or missing, start fresh */ }
+  }
+
+  function init(){
+    load();
+    state.items.forEach(d => renderItem(d, false));
+    for(let i=0;i<state.butterflies;i++) createButterflyEl();
+  }
+
+  // expose to buttons
+  window.addItem = addItem;
+  window.spawnButterfly = spawnButterfly;
+  window.emptyJar = emptyJar;
+
+  init();
+})();
+</script>
+
+</body>
+</html>
